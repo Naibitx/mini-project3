@@ -8,11 +8,12 @@ class MCTSNode:
         self.move= move#used to store the mvoe used to reach the node from its parent
         self.children=[]#all children in node
         self.visits= 0#number of time the node has been visited
-        self.total_points= state.get_legal_moves()#amount fo points total
+        self.total_points=0.0#amount fo points total
+        self.untried_moves= state.get_legal_moves()
 
     def is_terminal(self):
         return self.state.is_terminal()#true if node state is terminal
-    def fully_expanded(self):#true if there is no more unexplored moves
+    def is_fully_expanded(self):#true if there is no more unexplored moves
         return len(self.untried_moves)==0
     def best_child(self, c=math.sqrt(2)):#selects the child with the highest UCT score
         best_score= float("-inf")
@@ -34,7 +35,6 @@ class MCTSNode:
         self.untried_moves.remove(move)
 
         next_state= self.make_move(move)#generates the next game state from that move
-
         child_node= MCTSNode(next_state, parent=self, move=move)#create a new child node
         self.children.append(child_node)
         return child_node
@@ -69,9 +69,9 @@ def mcts(state, iterations=1000):
     root_player= state.current_player
     for _ in range(iterations):#runs MCTS for the amount of number of iterations
         node= root
-        while not node.is_terminal() and node.fully_expanded():#seletions, keeps moving down while node is non terminal
+        while not node.is_terminal() and node.is_fully_expanded():#seletions, keeps moving down while node is non terminal
                 node = node.best_child()
-        if not node.is_terminal() and not node.fully_expanded():#expansions
+        if not node.is_terminal() and not node.is_fully_expanded():#expansions
                 node = node.expand()
         reward =simulate_random_play(node.state, root_player)#simulations play randomly from the new node until the game ends
         backpropagate(node, reward)#back propagation
