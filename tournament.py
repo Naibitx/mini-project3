@@ -107,7 +107,7 @@ def measure_mcts_timing(iteration_counts, games_per_setting=20):
         total_avg_time = 0.0
 
         for _ in range(games_per_setting):
-            _, x_avg_time, _ = play_game(mcts_agent, random_agent)
+            _, x_avg_time, _ = play_game(mcts_agent, rand_agent)
             total_avg_time += x_avg_time
 
         overall_avg = total_avg_time / games_per_setting
@@ -131,10 +131,10 @@ def main():
     mcts_1000= make_mcts_agent(1000)
     results= []
     results.append(
-        run_matchup("Minimax (X) vs Random (O)", minimax_ab, random_agent, num_games)
+        run_matchup("Minimax (X) vs Random (O)", minimax_ab, rand_agent, num_games)
     )
     results.append(
-        run_matchup("MCTS-1000 (X) vs Random (O)", mcts_1000, random_agent, num_games)
+        run_matchup("MCTS-1000 (X) vs Random (O)", mcts_1000, rand_agent, num_games)
     )
     results.append(
         run_matchup("Minimax (X) vs MCTS-1000 (O)", minimax_ab, mcts_1000, num_games)
@@ -158,7 +158,7 @@ def main():
     minimax_total = 0.0
     minimax_games = 20
     for _ in range(minimax_games):
-        _, x_avg_time, _= play_game(minimax_ab, random_agent)
+        _, x_avg_time, _= play_game(minimax_ab, rand_agent)
         minimax_total+= x_avg_time
     minimax_avg= minimax_total / minimax_games
     print(f"\nMinimax average time per move: {minimax_avg:.6f} seconds")
