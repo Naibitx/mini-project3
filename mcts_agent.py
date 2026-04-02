@@ -10,7 +10,7 @@ class MCTSNode:
         self.visits= 0#number of time the node has been visited
         self.total_points= state.get_legal_moves()#amount fo points total
 
-    def terminal(self):
+    def is_terminal(self):
         return self.state.terminal()#true if node state is terminal
     def fully_expanded(self):#true if there is no more unexplored moves
         return len(self.untried_moves)==0
@@ -39,4 +39,42 @@ class MCTSNode:
         self.children.append(child_node)
         return child_node
     
-    
+def simulate_random_play(state,root_player):
+    current_state= state#starts at the given state
+
+    while not current_state.terminal():#makes random legal move until the game ends
+        move= random.choice(current_state.get_legal_moves())
+        current_state= current_state.make_move(move)
+    result= current_state.utility()
+
+    if result==root_player:
+        return 1
+    elif result==0:
+        return 0
+    else:
+        return -1
+        
+def backpropagate(node, reward):
+    current= node #walk up from the current node to the root
+    while current is not None:
+        current.visits += 1#increase visit count
+        current.total_points+= reward#add simulation reward
+        current= current.parent#move to parent
+
+def mcts(state, iterations=1000):
+    if state.terminal():#if state is terminal there is no move to make
+        return None
+    root= MCTSNode(state)
+        
+    root_player= state.current_player
+    for _ in range(iterations):#runs MCTS for the amount of number of iterations
+        node= root
+        while not node.is_terminal() and node.fully_expanded():#seletions, keeps moving down while node is non terminal
+                node = node.best_child()
+        if not node.is_terminal() and not node.fully_expanded():#expansions
+                node = node.expand()
+        reward =simulate_random_play(node.state, root_player)#simulations play randomly from the new node until the game ends
+        backpropagate(node, reward)#back propagation
+
+    best_child = max(root.children, key=lambda child: child.visits)
+    return best_child.move
