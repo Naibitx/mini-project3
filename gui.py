@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+from PIL import Image, ImageTk
 import random
 
 from game import TicTacToe
@@ -226,16 +227,50 @@ class TicTacToeGUI:
         )
         self.score_label.pack(pady=5)
 
-        self.canvas = tk.Canvas(self.root, width=self.size, height=self.size, bg="#69c3b0")
-        self.canvas.pack(padx=10, pady=10)
+        #this will be the main area with the icons and the board chat
+        self.main_frame = tk.Frame(self.root)
+        self.main_frame.pack(pady=10)
+
+        self.left_icon_frame = tk.Frame(self.main_frame)
+        self.left_icon_frame.grid(row=0, column=0, padx=20)
+
+        self.board_frame = tk.Frame(self.main_frame)
+        self.board_frame.grid(row=0, column=1)
+
+        self.right_icon_frame = tk.Frame(self.main_frame)
+        self.right_icon_frame.grid(row=0, column=2, padx=20)
+
+        self.canvas = tk.Canvas(self.board_frame, width=self.size, height=self.size, bg="#69c3b0")
+        self.canvas.pack()
 
         #all for the tournament
         self.visual_tournament_mode= False
         self.tournament_matchups= []
         self.current_matchup_index= 0
-        self.games_per_matchup= 2
+        self.games_per_matchup= 1
         self.current_game_number= 0
         self.matchup_scores= {"X": 0, "O": 0, "Draw": 0}
+
+        # icon selector state
+        self.icon_paths = [
+            "icons/carlos.jpeg",
+            "icons/diego.jpeg",
+            "icons/jaimes.jpg",
+            "icons/kyla.jpeg",
+            "icons/naibys.jpeg"
+        ]
+
+        self.icon_size_big = (80, 80)
+        self.icon_size_small = (120, 120)
+        self.big_icons = []
+        self.small_icons = []
+        self.left_selected_icon_index = None
+        self.right_selected_icon_index = None
+        self.left_choices_visible = False
+        self.right_choices_visible = False
+
+        self.load_icons()
+        self.build_icon_selectors()
 
         self.redraw()
 
@@ -268,6 +303,103 @@ class TicTacToeGUI:
                 self.canvas.create_line(x1, y2, x2, y1, width=5, fill="#4f4f4f")
             elif self.state.board[i] == -1:
                 self.canvas.create_oval(x1, y1, x2, y2, width=5, outline="#f3eed9")
+    def load_icons(self):
+        self.big_icons.clear()
+        self.small_icons.clear()
+
+        for path in self.icon_paths:
+            img_big = Image.open(path).resize(self.icon_size_big, Image.Resampling.LANCZOS)
+            img_small = Image.open(path).resize(self.icon_size_small, Image.Resampling.LANCZOS)
+
+            self.big_icons.append(ImageTk.PhotoImage(img_big))
+            self.small_icons.append(ImageTk.PhotoImage(img_small))
+
+
+    def build_icon_selectors(self):
+        #the left icons
+        tk.Label(self.left_icon_frame, text="X Icon", font=("Arial", 12, "bold")).pack(pady=(0, 8))
+
+        self.left_main_button = tk.Button(
+            self.left_icon_frame,
+            text="Choose\nIcon",
+            command=self.toggle_left_choices
+        )
+        self.left_main_button.pack()
+
+        self.left_choices_frame = tk.Frame(self.left_icon_frame)
+
+        self.left_choice_buttons = []
+        for i in range(5):
+            btn = tk.Button(
+                self.left_choices_frame,
+                image=self.small_icons[i],
+                command=lambda idx=i: self.select_left_icon(idx)
+            )
+            btn.grid(row=i, column=0, pady=3)
+            self.left_choice_buttons.append(btn)
+
+        #the right icons
+        tk.Label(self.right_icon_frame, text="O Icon", font=("Arial", 12, "bold")).pack(pady=(0, 8))
+
+        self.right_main_button = tk.Button(
+            self.right_icon_frame,
+            text="Choose\nIcon",
+            command=self.toggle_right_choices
+        )
+        self.right_main_button.pack()
+        self.right_choices_frame = tk.Frame(self.right_icon_frame)
+        self.right_choice_buttons = []
+        for i in range(5):
+            btn = tk.Button(
+                self.right_choices_frame,
+                image=self.small_icons[i],
+                command=lambda idx=i: self.select_right_icon(idx)
+            )
+            btn.grid(row=i, column=0, pady=3)
+            self.right_choice_buttons.append(btn)
+
+
+    def toggle_left_choices(self):
+        self.left_choices_visible = not self.left_choices_visible
+        if self.left_choices_visible:
+            self.left_choices_frame.pack(pady=8)
+        else:
+            self.left_choices_frame.pack_forget()
+
+
+    def toggle_right_choices(self):
+        self.right_choices_visible = not self.right_choices_visible
+        if self.right_choices_visible:
+            self.right_choices_frame.pack(pady=8)
+        else:
+            self.right_choices_frame.pack_forget()
+
+
+    def select_left_icon(self, index):
+        self.left_selected_icon_index = index
+        self.left_main_button.config(
+            image=self.big_icons[index],
+            text="",
+            width=120,
+            height=120,
+            relief="solid",
+            bd=3
+        )
+        self.left_choices_visible = False
+        self.left_choices_frame.pack_forget()
+
+    def select_right_icon(self, index):
+        self.right_selected_icon_index = index
+        self.right_main_button.config(
+            image=self.big_icons[index],
+            text="",
+            width=120,
+            height=120,
+            relief="solid",
+            bd=3
+        )
+        self.right_choices_visible = False
+        self.right_choices_frame.pack_forget()
 
     def redraw(self):
         self.canvas.delete("all")
@@ -280,6 +412,29 @@ class TicTacToeGUI:
             return
         self.state = TicTacToe()
         self.status_label.config(text="Board reset. Choose agents and start a match.")
+        self.left_selected_icon_index = None
+        self.right_selected_icon_index = None
+        self.left_choices_visible = False
+        self.right_choices_visible = False
+        self.left_choices_frame.pack_forget()
+        self.right_choices_frame.pack_forget()
+        self.left_main_button.config(
+            image="",
+            text="Choose\nIcon",
+            width=10,
+            height=5,
+            relief="raised",
+            bd=2
+        )
+
+        self.right_main_button.config(
+            image="",
+            text="Choose\nIcon",
+            width=10,
+            height=5,
+            relief="raised",
+            bd=2
+        )
         self.redraw()
 
     def get_current_agent(self):
@@ -417,19 +572,24 @@ class TicTacToeGUI:
 
     def show_node_counts(self):
         global plain_nodes, ab_nodes
-        state = TicTacToe()
+        state = self.state  #in here it uses the CURRENT board instead of a fresh empty one
+        if state.is_terminal():
+            messagebox.showinfo("Node Count Results", "The current board is already terminal.")
+            return
         plain_nodes = 0
         plain_move = minimax_plain(state)
         ab_nodes = 0
         ab_move = minimax_ab_counted(state)
-        pruned = ((plain_nodes - ab_nodes) / plain_nodes) * 100
+        pruned = ((plain_nodes - ab_nodes) / plain_nodes) * 100 if plain_nodes > 0 else 0
         result_text = (
+            f"Current Board State:\n{state.board}\n\n"
             f"Plain Minimax Move: {plain_move}\n"
             f"Plain Minimax Nodes: {plain_nodes}\n\n"
             f"Alpha-Beta Move: {ab_move}\n"
             f"Alpha-Beta Nodes: {ab_nodes}\n\n"
             f"Pruned: {pruned:.2f}%"
         )
+
         messagebox.showinfo("Node Count Results", result_text)
 
     def run(self):
