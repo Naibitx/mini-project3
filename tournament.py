@@ -6,8 +6,10 @@ from game import TicTacToe
 from minimax_agent import minimax_ab
 from mcts_agent import mcts
 
+# creating agent and making a legal move
 def random_agent(state):
     return random.choice(state.get_legal_moves())
+# creating MCTS agent and taking in num of iterations
 def make_mcts_agent(iterations):
     def agent(state):
         return mcts(state, iterations=iterations)
@@ -21,14 +23,19 @@ def play_game(x_agent, o_agent):
     x_moves= 0
     o_moves= 0
 
+    # game loop
+    # runs until there is a win or a draw
     while not state.is_terminal():
+        # turn handling
+        # if state = 1 -> x
         if state.current_player== 1:
             start= time.perf_counter()
             move= x_agent(state)
             end= time.perf_counter()
-
+            # finding average decision time for the respective agents
             x_total_time+= (end - start)
             x_moves+= 1
+        # otherwise, move the o agent
         else:
             start= time.perf_counter()
             move= o_agent(state)
@@ -37,6 +44,7 @@ def play_game(x_agent, o_agent):
             o_total_time += (end - start)
             o_moves += 1
         state= state.make_move(move)
+        # getting the winner state
     winner= state.check_winner()
 
     if winner== 1:
@@ -50,13 +58,14 @@ def play_game(x_agent, o_agent):
     return result, x_avg_time, o_avg_time
 
 def run_matchup(name, x_agent, o_agent, num_games=100):
+    # running many games between 2 agents
     x_wins= 0
     o_wins= 0
     draws= 0
 
     total_x_avg= 0.0
     total_o_avg= 0.0
-
+    # for each game, aggregate stats like total wins and decision times
     for _ in range(num_games):
         result, x_avg_time, o_avg_time = play_game(x_agent, o_agent)
         if result== "X":
@@ -70,7 +79,7 @@ def run_matchup(name, x_agent, o_agent, num_games=100):
 
     avg_x_time= total_x_avg / num_games
     avg_o_time= total_o_avg / num_games
-
+    # returning a dictionary containing game stats
     return {
         "matchup": name,
         "games": num_games,
@@ -80,6 +89,7 @@ def run_matchup(name, x_agent, o_agent, num_games=100):
         "x_avg_time": avg_x_time,
         "o_avg_time": avg_o_time
     }
+    # printing results
 def print_results_table(results):
     print("\nTOURNAMENT RESULTS")
     print("-" * 95)
@@ -100,6 +110,7 @@ def print_results_table(results):
         )
     print("-" * 95)
 def measure_mcts_timing(iteration_counts, games_per_setting=20):
+    # measuring MCTS timing to find out how the speed changes with each iteration
     times = []
 
     for iterations in iteration_counts:
@@ -109,12 +120,13 @@ def measure_mcts_timing(iteration_counts, games_per_setting=20):
         for _ in range(games_per_setting):
             _, x_avg_time, _ = play_game(mcts_agent, random_agent)
             total_avg_time += x_avg_time
-
+        # calculating average time across all iterations
         overall_avg = total_avg_time / games_per_setting
         times.append(overall_avg)
 
     return times
 
+# plotting results of MCTS timing
 def plot_mcts_timing(iteration_counts, times, filename="mcts_timing_graph.png"):
     plt.figure(figsize=(8, 5))
     plt.plot(iteration_counts, times, marker="o")
