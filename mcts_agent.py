@@ -29,3 +29,14 @@ class MCTSNode:
                 best_score = score
                 best_node = child
         return best_node
+    def expand(self):
+        move= random.choice(self.untried_moves)#chooses one unexplored move randomly
+        self.untried_moves.remove(move)
+
+        next_state= self.make_move(move)#generates the next game state from that move
+
+        child_node= MCTSNode(next_state, parent=self, move=move)#create a new child node
+        self.children.append(child_node)
+        return child_node
+    
+    
