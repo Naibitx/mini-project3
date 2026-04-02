@@ -3,9 +3,8 @@ from tkinter import ttk
 import random
 
 from game import TicTacToe
-from minimax_agent import minimax
+from minimax_agent import minimax_ab
 from mcts_agent import mcts
-
 
 def random_agent(state):
     return random.choice(state.get_legal_moves())
@@ -23,7 +22,7 @@ class TicTacToeGUI:
 
         self.agent_map = {
             "Random": random_agent,
-            "Minimax": minimax,
+            "Minimax": minimax_ab,
             "MCTS (1000)": mcts_agent_1000
         }
 
