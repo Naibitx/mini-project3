@@ -11,7 +11,7 @@ class MCTSNode:
         self.total_points= state.get_legal_moves()#amount fo points total
 
     def is_terminal(self):
-        return self.state.terminal()#true if node state is terminal
+        return self.state.is_terminal()#true if node state is terminal
     def fully_expanded(self):#true if there is no more unexplored moves
         return len(self.untried_moves)==0
     def best_child(self, c=math.sqrt(2)):#selects the child with the highest UCT score
@@ -42,7 +42,7 @@ class MCTSNode:
 def simulate_random_play(state,root_player):
     current_state= state#starts at the given state
 
-    while not current_state.terminal():#makes random legal move until the game ends
+    while not current_state.is_terminal():#makes random legal move until the game ends
         move= random.choice(current_state.get_legal_moves())
         current_state= current_state.make_move(move)
     result= current_state.utility()
@@ -62,7 +62,7 @@ def backpropagate(node, reward):
         current= current.parent#move to parent
 
 def mcts(state, iterations=1000):
-    if state.terminal():#if state is terminal there is no move to make
+    if state.is_terminal():#if state is terminal there is no move to make
         return None
     root= MCTSNode(state)
         
