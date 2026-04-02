@@ -1,5 +1,5 @@
 def minimax_ab(state):
-    alpha = float('-int')
+    alpha = float('-inf')
     beta = float('inf')
     # Return the best move for the current player.
     if state.current_player == 1: # max player
