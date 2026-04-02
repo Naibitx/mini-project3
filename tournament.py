@@ -127,7 +127,7 @@ def plot_mcts_timing(iteration_counts, times, filename="mcts_timing_graph.png"):
 
 
 def main():
-    num_games= 100
+    num_games= 5
     mcts_1000= make_mcts_agent(1000)
     results= []
     results.append(
